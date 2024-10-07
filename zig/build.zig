@@ -848,6 +848,9 @@ fn addCxxKnownPath(
         var it = std.mem.tokenizeAny(u8, ctx.cxx_compiler_arg1, &std.ascii.whitespace);
         while (it.next()) |arg| try args.append(arg);
         try args.append(b.fmt("-print-file-name={s}", .{objname}));
+        std.debug.print("addCxxKnownPath: ", .{});
+        for (args.items) |arg| std.debug.print("{s} ", .{arg});
+        std.debug.print("\n", .{});
         break :run b.run(args.items);
     };
     var tokenizer = mem.tokenizeAny(u8, path_padded, "\r\n");

@@ -55,7 +55,10 @@ cmake "$ROOTDIR/llvm" \
   -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF \
   -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF \
   -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF \
-  -DCLANG_TOOL_LIBCLANG_BUILD=OFF
+  -DCLANG_TOOL_LIBCLANG_BUILD=OFF \
+  -DCLANG_C_COMPILER="gcc" \
+  -DCLANG_CXX_COMPILER="g++" \
+  -GNinja \
 cmake --build . --target install
 
 # Now we build Zig, still with system C/C++ compiler, linking against LLVM,
@@ -66,7 +69,9 @@ cmake "$ROOTDIR/zig" \
   -DCMAKE_INSTALL_PREFIX="$ROOTDIR/out/host" \
   -DCMAKE_PREFIX_PATH="$ROOTDIR/out/host" \
   -DCMAKE_BUILD_TYPE=Release \
-  -DZIG_VERSION="$ZIG_VERSION"
+  -DZIG_VERSION="$ZIG_VERSION" \
+  -GNinja
+export ZIG_VERBOSE_LINK=1
 cmake --build . --target install
 
 # Now we have Zig as a cross compiler.
@@ -87,7 +92,8 @@ cmake "$ROOTDIR/zlib" \
   -DCMAKE_ASM_COMPILER="$ZIG;cc;-fno-sanitize=all;-s;-target;$TARGET;-mcpu=$MCPU" \
   -DCMAKE_RC_COMPILER="$ROOTDIR/out/host/bin/llvm-rc" \
   -DCMAKE_AR="$ROOTDIR/out/host/bin/llvm-ar" \
-  -DCMAKE_RANLIB="$ROOTDIR/out/host/bin/llvm-ranlib"
+  -DCMAKE_RANLIB="$ROOTDIR/out/host/bin/llvm-ranlib" \
+  -GNinja
 cmake --build . --target install
 
 # Same deal for zstd.
@@ -190,18 +196,6 @@ cmake "$ROOTDIR/llvm" \
   -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF \
   -DCLANG_TOOL_LIBCLANG_BUILD=OFF \
   -DLIBCLANG_BUILD_STATIC=ON \
-  -DLLD_BUILD_TOOLS=OFF
+  -DLLD_BUILD_TOOLS=OFF \
+  -GNinja
 cmake --build . --target install
-
-# Finally, we can cross compile Zig itself, with Zig.
-cd "$ROOTDIR/zig"
-$ZIG build \
-  --prefix "$ROOTDIR/out/zig-$TARGET-$MCPU" \
-  --search-prefix "$ROOTDIR/out/$TARGET-$MCPU" \
-  -Dflat \
-  -Dstatic-llvm \
-  -Doptimize=ReleaseFast \
-  -Dstrip \
-  -Dtarget="$TARGET" \
-  -Dcpu="$MCPU" \
-  -Dversion-string="$ZIG_VERSION"
