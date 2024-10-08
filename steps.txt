@@ -1,0 +1,29 @@
+git clone https://github.com/nickelca/zig-bootstrap.git
+git clone https://github.com/ziglang/zig.git
+
+# For static binaries:
+
+cd zig-bootstrap
+./build x86_64-linux-musl native
+cd ../zig
+cmake -B build -GNinja -DCMAKE_PREFIX_PATH=$PWD/../zig-bootstrap/out/host
+cmake --build build
+./build/stage3/bin/zig build -Dstatic-llvm -Dno-langref -Dflat \
+    -Dconfig_h=build/config.h -Dtarget=native-native-musl \
+    -Doptimize=ReleaseFast \
+    --search-path path/to/zig-bootstrap/out/x86_64-linux-musl-native \
+    -p stage3
+
+
+# For dynamic binaries (untested):
+
+cd zig-bootstrap
+./build x86_64-linux-gnu native
+cd ../zig
+cmake -B build -GNinja -DCMAKE_PREFIX_PATH=$PWD/../zig-bootstrap/out/host
+cmake --build build
+./build/stage3/bin/zig build -Dno-langref -Dflat \
+    -Dconfig_h=build/config.h -Dtarget=native-native-gnu \
+    -Doptimize=ReleaseFast \
+    --search-path path/to/zig-bootstrap/out/x86_64-linux-gnu-native \
+    -p stage3
