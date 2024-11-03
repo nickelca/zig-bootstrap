@@ -58,7 +58,7 @@ cmake "$ROOTDIR/llvm" \
   -DCLANG_TOOL_LIBCLANG_BUILD=OFF \
   -DCLANG_C_COMPILER="gcc" \
   -DCLANG_CXX_COMPILER="g++" \
-  -GNinja \
+  -GNinja
 cmake --build . --target install
 
 # Now we build Zig, still with system C/C++ compiler, linking against LLVM,
